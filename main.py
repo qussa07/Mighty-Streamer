@@ -5,6 +5,9 @@ pygame.display.set_icon(icon)
 pygame.display.set_caption('Mighty Streamer')
 background = pygame.image.load('images/bg.png')
 
+class Player:
+    def __init__(self):
+        pass
 
 
 size = width, height = 544, 320
