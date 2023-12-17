@@ -18,8 +18,29 @@ class Player:
         self.render.add(self.player)
         self.player.rect.x = x
         self.player.rect.y = y
+        self.health_points = 3
+        self.count = 0
+        self.flag = 0
+        self.side = 0
+        self.sides = ['Left', 'Right']
 
-    def rendering(self, screen):
+    def rendering(self, screen, frame):
+        if self.flag == 2:
+            if frame == 2:
+                self.player.image = pygame.image.load(
+                    f'images/Player/Player{self.sides[self.side]}Sword/PlayerAttack{self.sides[self.side]}1.png')
+                self.player.rect.y = 620
+            elif frame == 4:
+                self.player.image = pygame.image.load(
+                    f'images/Player/Player{self.sides[self.side]}Sword/PlayerAttack{self.sides[self.side]}2.png')
+            elif frame == 6:
+                self.player.image = pygame.image.load(
+                    f'images/Player/Player{self.sides[self.side]}Sword/PlayerAttack{self.sides[self.side]}3.png')
+            elif frame == 8:
+                self.player.image = pygame.image.load(
+                    f'images/Player/Player{self.sides[self.side]}Sword/PlayerAttack{self.sides[self.side]}4.png')
+                self.flag = not self.flag
+                self.player.rect.y = 700
         self.render.draw(screen)
 
     def walk_left(self, frame):
@@ -32,6 +53,7 @@ class Player:
         elif frame == 28:
             self.player.image = pygame.image.load(f'images/Player/PlayerLeft/playerleft4.png')
         self.player.rect.x -= 4
+        self.side = 0
 
     def walk_right(self, frame):
         if frame == 7:
@@ -43,6 +65,7 @@ class Player:
         elif frame == 28:
             self.player.image = pygame.image.load(f'images/Player/PlayerRight/playerRight4.png')
         self.player.rect.x += 4
+        self.side = 1
 
     def check(self, frame):
         if frame == 28:
@@ -50,18 +73,8 @@ class Player:
 
         return frame
 
-    def attack(self, sc):
-        frame = 0
-        frame += 1
-        if frame == 1:
-            self.player.image = pygame.image.load(f'images/Player/PlayerLeftSword/PlayerAttackLeft1.png')
-            self.rendering(sc)
-        elif frame == 2:
-            self.player.image = pygame.image.load(f'images/Player/PlayerRight/PlayerAttackLeft2.png')
-        elif frame == 9:
-            self.player.image = pygame.image.load(f'images/Player/PlayerRight/PlayerAttackLeft3.png')
-        elif frame == 12:
-            self.player.image = pygame.image.load(f'images/Player/PlayerRight/PlayerAttackLeft4.png')
+    def attack(self):
+        self.flag = 2
 
 
 size = width, height = 1920, 1080
@@ -81,8 +94,9 @@ while running:
             if keys[pygame.K_a]:
                 main_character.walk_left(7)
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            main_character.attack(screen)
-    main_character.rendering(screen)
+            if event.button == 1:
+                main_character.attack()
+    main_character.rendering(screen, frame)
     keys = pygame.key.get_pressed()
     if keys[pygame.K_d]:
         main_character.walk_right(frame)
