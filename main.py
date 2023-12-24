@@ -5,7 +5,8 @@ pygame.display.set_icon(icon)
 pygame.display.set_caption('Mighty Streamer')
 background = pygame.image.load('images/bg.png')
 
-
+class enemy:
+    pass
 
 size = width, height = 544, 320
 screen = pygame.display.set_mode(size)
