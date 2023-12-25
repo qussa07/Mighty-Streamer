@@ -1,4 +1,5 @@
 import pygame
+from enemy_mob import Mob
 
 clock = pygame.time.Clock()
 fps = 60
@@ -13,7 +14,7 @@ class Player:
         skin = pygame.image.load('images/Player/PlayerLeft/playerleft1.png')
         self.player = pygame.sprite.Sprite()
         self.player.image = skin
-        self.player.rect = self.player.image.get_rect(bottomright=(x, y))
+        self.player.rect = self.player.image.get_rect(center=(x, y))
         self.x = x
         self.y = y
         self.render = pygame.sprite.Group()
@@ -57,9 +58,9 @@ class Player:
                 self.player.image = self.playerleft1
                 self.flag = 0
         if self.side:
-            self.player.rect = self.player.image.get_rect(bottomleft=(self.x, self.y))
+            self.player.rect = self.player.image.get_rect(center=(self.x, self.y))
         else:
-            self.player.rect = self.player.image.get_rect(bottomright=(self.x, self.y))
+            self.player.rect = self.player.image.get_rect(center=(self.x, self.y))
         self.render.draw(screen)
 
     def walk_left(self, frame):
@@ -102,10 +103,12 @@ class Player:
 size = width, height = 1920, 1080
 screen = pygame.display.set_mode(size)
 main_character = Player(60, 780)
+mob = Mob(500, 580)
 frame = 0
 running = True
 while running:
     frame += 1
+
     screen.blit(background, (0, 0))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -121,11 +124,14 @@ while running:
         elif event.type == pygame.K_SPACE:
             main_character.jump()
     main_character.rendering(screen, frame)
+    mob.rendering(screen, frame)
     keys = pygame.key.get_pressed()
+
     if keys[pygame.K_d]:
         main_character.walk_right(frame)
     if keys[pygame.K_a]:
         main_character.walk_left(frame)
     frame = main_character.check(frame)
+    frame1 = mob.check(frame)
     clock.tick(fps)
     pygame.display.flip()
