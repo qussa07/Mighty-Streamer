@@ -22,6 +22,7 @@ class Player:
         self.count = 0
         self.flag = 1
         self.side = 0
+        self.jumping = 0
         self.sides = ['Left', 'Right']
         self.playerleft1 = pygame.image.load(f'images/Player/PlayerLeft/playerleft1.png').convert_alpha()
         self.playerleft2 = pygame.image.load(f'images/Player/PlayerLeft/playerleft2.png').convert_alpha()
@@ -56,6 +57,23 @@ class Player:
             else:
                 self.player.image = self.playerleft1
                 self.flag = 0
+        elif self.flag == 3:
+            self.jumping += 1
+            print(self.jumping)
+            if self.jumping == 5:
+                self.y -= 20
+            elif self.jumping == 10:
+                self.y -= 20
+            elif self.jumping == 15:
+                self.y -= 20
+            elif self.jumping == 20:
+                self.y += 20
+            elif self.jumping == 25:
+                self.y += 20
+            elif self.jumping == 30:
+                self.y += 20
+                self.flag = 1
+                self.jumping = 0
         if self.side:
             self.player.rect = self.player.image.get_rect(bottomleft=(self.x, self.y))
         else:
@@ -96,7 +114,8 @@ class Player:
         self.flag = 2
 
     def jump(self):
-        pass
+        self.flag = 3
+
 
 
 size = width, height = 1920, 1080
@@ -118,7 +137,7 @@ while running:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 main_character.attack()
-        elif event.type == pygame.K_SPACE:
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
             main_character.jump()
     main_character.rendering(screen, frame)
     keys = pygame.key.get_pressed()
