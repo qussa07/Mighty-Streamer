@@ -48,8 +48,8 @@ class Player:
             elif frame == 8:
                 self.player.image = pygame.image.load(
                     f'images/Player/Player{self.sides[self.side]}Sword/PlayerAttack{self.sides[self.side]}4.png').convert_alpha()
+                self.player.rect = self.player.image.get_rect(bottomleft=(self.x, self.y))
                 self.flag = 1
-                self.player.rect.y = 700
         elif self.flag == 1:
             if self.side == 1:
                 self.player.image = self.playerRight1
@@ -59,19 +59,15 @@ class Player:
                 self.flag = 0
         elif self.flag == 3:
             self.jumping += 1
-            print(self.jumping)
-            if self.jumping == 5:
-                self.y -= 20
-            elif self.jumping == 10:
-                self.y -= 20
-            elif self.jumping == 15:
-                self.y -= 20
-            elif self.jumping == 20:
-                self.y += 20
-            elif self.jumping == 25:
-                self.y += 20
-            elif self.jumping == 30:
-                self.y += 20
+            if self.jumping <= 6:
+                self.count += 8
+                self.y -= 8
+            elif 6 <= self.jumping <= 10:
+                self.y -= 3
+                self.count += 3
+            elif 10 <= self.jumping <= 20:
+                self.y += 6
+            else:
                 self.flag = 1
                 self.jumping = 0
         if self.side:
