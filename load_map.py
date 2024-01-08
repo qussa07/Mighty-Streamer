@@ -22,7 +22,8 @@ def generate_level(level):
     for y in range(len(level)):
         for x in range(len(level[y])):
             if level[y][x] == '#':
-                tiles_group.add(tile_images['block'])
+                a = pygame.sprite.Sprite(tile_images['block'])
+                tiles_group.add(a)
     return tiles_group
 
 
