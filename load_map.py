@@ -18,24 +18,23 @@ def load_level(filename):
     # дополняем каждую строку пустыми клетками ('.')
     return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
-def generate_level(level):
+def generate_level(level, screen):
+    x, y = 0, 0
     for y in range(len(level)):
         for x in range(len(level[y])):
             if level[y][x] == '#':
-                a = pygame.sprite.Sprite()
-                a.image(pygame.image.load('images/blockDirth.png'))
-                tiles_group.add(a)
+                screen.blit(tile_images['block'], (tile_width * x, tile_height * y))
+
     return tiles_group
 
 
 
 size = WIDTH, HEIGHT = 1920, 1080
 screen = pygame.display.set_mode(size)
-g = generate_level(load_level('map.txt'))
 running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    tiles_group.draw(screen)
+    generate_level(load_level('map.txt'), screen)
     pygame.display.flip()
