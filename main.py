@@ -14,7 +14,7 @@ class Player:
         skin = pygame.image.load('images/Player/PlayerLeft/playerleft1.png')
         self.player = pygame.sprite.Sprite()
         self.player.image = skin
-        self.player.rect = self.player.image.get_rect(center=(x, y))
+        self.player.rect = self.player.image.get_rect(bottomright=(x, y))
         self.x = x
         self.y = y
         self.render = pygame.sprite.Group()
@@ -23,6 +23,7 @@ class Player:
         self.count = 0
         self.flag = 1
         self.side = 0
+        self.jumping = 0
         self.sides = ['Left', 'Right']
         self.playerleft1 = pygame.image.load(f'images/Player/PlayerLeft/playerleft1.png').convert_alpha()
         self.playerleft2 = pygame.image.load(f'images/Player/PlayerLeft/playerleft2.png').convert_alpha()
@@ -48,8 +49,8 @@ class Player:
             elif frame == 8:
                 self.player.image = pygame.image.load(
                     f'images/Player/Player{self.sides[self.side]}Sword/PlayerAttack{self.sides[self.side]}4.png').convert_alpha()
+                self.player.rect = self.player.image.get_rect(bottomleft=(self.x, self.y))
                 self.flag = 1
-                self.player.rect.y = 700
         elif self.flag == 1:
             if self.side == 1:
                 self.player.image = self.playerRight1
@@ -57,10 +58,23 @@ class Player:
             else:
                 self.player.image = self.playerleft1
                 self.flag = 0
+        elif self.flag == 3:
+            self.jumping += 1
+            if self.jumping <= 6:
+                self.count += 8
+                self.y -= 8
+            elif 6 <= self.jumping <= 10:
+                self.y -= 3
+                self.count += 3
+            elif 10 <= self.jumping <= 20:
+                self.y += 6
+            else:
+                self.flag = 1
+                self.jumping = 0
         if self.side:
-            self.player.rect = self.player.image.get_rect(center=(self.x, self.y))
+            self.player.rect = self.player.image.get_rect(bottomleft=(self.x, self.y))
         else:
-            self.player.rect = self.player.image.get_rect(center=(self.x, self.y))
+            self.player.rect = self.player.image.get_rect(bottomright=(self.x, self.y))
         self.render.draw(screen)
 
     def walk_left(self, frame):
@@ -97,18 +111,21 @@ class Player:
         self.flag = 2
 
     def jump(self):
-        pass
+        self.flag = 3
+
 
 
 size = width, height = 1920, 1080
 screen = pygame.display.set_mode(size)
 main_character = Player(60, 780)
-mob = Mob(500, 580)
 frame = 0
 running = True
-while running:
-    frame += 1
 
+mob = Mob(500, 780)
+
+while running:
+    mob.mob_view(main_character)
+    frame += 1
     screen.blit(background, (0, 0))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -121,17 +138,15 @@ while running:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 main_character.attack()
-        elif event.type == pygame.K_SPACE:
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
             main_character.jump()
     main_character.rendering(screen, frame)
-    mob.rendering(screen, frame)
     keys = pygame.key.get_pressed()
-
     if keys[pygame.K_d]:
         main_character.walk_right(frame)
     if keys[pygame.K_a]:
         main_character.walk_left(frame)
+    mob.render.draw(screen)
     frame = main_character.check(frame)
-    frame1 = mob.check(frame)
     clock.tick(fps)
     pygame.display.flip()
