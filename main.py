@@ -13,12 +13,14 @@ colide = []
 
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
+enemy_group = pygame.sprite.Group()
+blocks_grop = pygame.sprite.Group()
 
 tile_images = {
-    'block': pygame.image.load('images/blocks/blockDirth.png'),
+    'block': pygame.image.load('images/blocks/blockDirth1.png'),
     'box': pygame.image.load('images/blocks/blockPrepatstvie.png')
 }
-tile_width = tile_height = 300
+tile_width = tile_height = 70
 
 
 def load_level(filename):
@@ -40,10 +42,12 @@ def generate_level(level, screen, move):
             if level[y][x] == '#':
                 screen.blit(tile_images['block'], (tile_width * x + move, tile_height * y))
             elif level[y][x] == '*':
-                screen.blit(tile_images['box'], (tile_width * x + move, tile_height * (y + 1) - 70))
+                screen.blit(tile_images['box'], (tile_width * x + move, tile_height * y))
                 if count == 0:
-                    colide.append(
-                        tile_images['box'].get_rect(topleft=(tile_width * x + move, tile_height * (y + 1) - 70)))
+                    a = pygame.sprite.Sprite()
+                    a.image = tile_images['box']
+                    a.rect = a.image.get_rect(topleft=(tile_width * x + move, tile_height * y))
+                    blocks_grop.add(a)
             elif level[y][x] == '!':
                 if count == 0:
                     colide.append(
@@ -110,16 +114,19 @@ class Player:
         elif self.flag == 3:
             self.jumping += 1
             if self.jumping <= 6:
-                self.count += 8
-                self.y -= 8
+                self.y -= 15
             elif 6 <= self.jumping <= 10:
-                self.y -= 3
-                self.count += 3
+                self.y -= 5
             elif 10 <= self.jumping <= 20:
-                self.y += 6
+                self.y += 11
             else:
                 self.flag = 1
                 self.jumping = 0
+
+        """if pygame.sprite.spritecollideany(self.player, blocks_grop):
+            self.stop = 1
+        else:
+            self.stop = 0"""
         if self.side:
             self.player.rect = self.player.image.get_rect(bottomleft=(self.x, self.y))
         else:
@@ -135,13 +142,12 @@ class Player:
             self.player.image = self.playerleft3
         elif frame == 28:
             self.player.image = self.playerleft4
-        if self.player.rect.x != 0:
-            self.x -= 4
-        elif self.stop:
-            pass
-        else:
-            self.move += 2
-        self.side = 0
+        if self.stop == 0:
+            if self.player.rect.x != 0:
+                self.x -= 4
+            else:
+                self.move += 2
+            self.side = 0
 
     def walk_right(self, frame):
         if frame == 7:
@@ -152,13 +158,12 @@ class Player:
             self.player.image = self.playerRight3
         elif frame == 28:
             self.player.image = self.playerRight4
-        if self.stop:
-            pass
-        elif self.player.rect.x != 1000:
-            self.x += 4
-        else:
-            self.move -= 2
-        self.side = 1
+        if self.stop == 0:
+            if self.player.rect.x != 1000:
+                self.x += 4
+            else:
+                self.move -= 2
+            self.side = 1
 
     def check(self, frame):
         if frame == 28:
@@ -177,7 +182,7 @@ class Player:
 
 size = width, height = 1920, 1080
 screen = pygame.display.set_mode(size)
-main_character = Player(60, 900)
+main_character = Player(60, 1050)
 frame = 0
 running = True
 while running:
