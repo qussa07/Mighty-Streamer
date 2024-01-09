@@ -7,14 +7,19 @@ pygame.display.set_icon(icon)
 pygame.display.set_caption('Mighty Streamer')
 background = pygame.image.load('images/bg.jpg')
 
+count = 0
+
+colide = []
 
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 
 tile_images = {
-    'block': pygame.image.load('images/blockDirth.png')
+    'block': pygame.image.load('images/blocks/blockDirth.png'),
+    'box': pygame.image.load('images/blocks/blockPrepatstvie.png')
 }
 tile_width = tile_height = 300
+
 
 def load_level(filename):
     filename = filename
@@ -26,13 +31,24 @@ def load_level(filename):
     # дополняем каждую строку пустыми клетками ('.')
     return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
-def generate_level(level, screen):
+
+def generate_level(level, screen, move):
+    global count
     x, y = 0, 0
     for y in range(len(level)):
         for x in range(len(level[y])):
             if level[y][x] == '#':
-                screen.blit(tile_images['block'], (tile_width * x, tile_height * y))
-
+                screen.blit(tile_images['block'], (tile_width * x + move, tile_height * y))
+            elif level[y][x] == '*':
+                screen.blit(tile_images['box'], (tile_width * x + move, tile_height * (y + 1) - 70))
+                if count == 0:
+                    colide.append(
+                        tile_images['box'].get_rect(topleft=(tile_width * x + move, tile_height * (y + 1) - 70)))
+            elif level[y][x] == '!':
+                if count == 0:
+                    colide.append(
+                        tile_images['box'].get_rect(topleft=(tile_width * x + move, tile_height * (y + 1) - 70)))
+    count = 1
     return tiles_group
 
 
@@ -51,6 +67,7 @@ class Player:
         self.flag = 1
         self.side = 0
         self.jumping = 0
+        self.move = 0
         self.sides = ['Left', 'Right']
         self.playerleft1 = pygame.image.load(f'images/Player/PlayerLeft/playerleft1.png').convert_alpha()
         self.playerleft2 = pygame.image.load(f'images/Player/PlayerLeft/playerleft2.png').convert_alpha()
@@ -60,6 +77,11 @@ class Player:
         self.playerRight2 = pygame.image.load(f'images/Player/PlayerRight/playerRight2.png').convert_alpha()
         self.playerRight3 = pygame.image.load(f'images/Player/PlayerRight/playerRight3.png').convert_alpha()
         self.playerRight4 = pygame.image.load(f'images/Player/PlayerRight/playerRight4.png').convert_alpha()
+        self.hp0 = pygame.image.load(f'images/hp/0HP.png').convert_alpha()
+        self.hp1 = pygame.image.load(f'images/hp/1HP.png').convert_alpha()
+        self.hp2 = pygame.image.load(f'images/hp/2HP.png').convert_alpha()
+        self.hp3 = pygame.image.load(f'images/hp/FullHP.png').convert_alpha()
+        self.stop = 0
 
     def rendering(self, screen, frame):
         if self.flag == 2:
@@ -113,7 +135,12 @@ class Player:
             self.player.image = self.playerleft3
         elif frame == 28:
             self.player.image = self.playerleft4
-        self.x -= 4
+        if self.player.rect.x != 0:
+            self.x -= 4
+        elif self.stop:
+            pass
+        else:
+            self.move += 2
         self.side = 0
 
     def walk_right(self, frame):
@@ -125,7 +152,12 @@ class Player:
             self.player.image = self.playerRight3
         elif frame == 28:
             self.player.image = self.playerRight4
-        self.x += 4
+        if self.stop:
+            pass
+        elif self.player.rect.x != 1000:
+            self.x += 4
+        else:
+            self.move -= 2
         self.side = 1
 
     def check(self, frame):
@@ -135,11 +167,12 @@ class Player:
         return frame
 
     def attack(self):
-        self.flag = 2
+        if self.flag != 3:
+            self.flag = 2
 
     def jump(self):
-        self.flag = 3
-
+        if self.flag != 2:
+            self.flag = 3
 
 
 size = width, height = 1920, 1080
@@ -150,7 +183,7 @@ running = True
 while running:
     frame += 1
     screen.blit(background, (0, 0))
-    generate_level(load_level('map.txt'), screen)
+    generate_level(load_level('map.txt'), screen, main_character.move)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
