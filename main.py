@@ -14,7 +14,8 @@ colide = []
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 enemy_group = pygame.sprite.Group()
-blocks_grop = pygame.sprite.Group()
+let_group = pygame.sprite.Group()
+floor_group = pygame.sprite.Group()
 
 tile_images = {
     'block': pygame.image.load('images/blocks/blockDirth1.png'),
@@ -36,22 +37,31 @@ def load_level(filename):
 
 def generate_level(level, screen, move):
     global count
+    floor_group.empty()
+    all_sprites.empty()
+    tiles_group.empty()
+    enemy_group.empty()
+    let_group.empty()
     x, y = 0, 0
     for y in range(len(level)):
         for x in range(len(level[y])):
             if level[y][x] == '#':
                 screen.blit(tile_images['block'], (tile_width * x + move, tile_height * y))
+                a = pygame.sprite.Sprite()
+                a.image = tile_images['block']
+                a.rect = a.image.get_rect(topleft=(tile_width * x + move, tile_height * y))
+                floor_group.add(a)
             elif level[y][x] == '*':
                 screen.blit(tile_images['box'], (tile_width * x + move, tile_height * y))
-                if count == 0:
-                    a = pygame.sprite.Sprite()
-                    a.image = tile_images['box']
-                    a.rect = a.image.get_rect(topleft=(tile_width * x + move, tile_height * y))
-                    blocks_grop.add(a)
-            elif level[y][x] == '!':
-                if count == 0:
-                    colide.append(
-                        tile_images['box'].get_rect(topleft=(tile_width * x + move, tile_height * (y + 1) - 70)))
+                a = pygame.sprite.Sprite()
+                a.image = tile_images['box']
+                a.rect = a.image.get_rect(topleft=(tile_width * x + move, tile_height * y))
+                let_group.add(a)
+
+        """ elif level[y][x] == '!':
+             if count == 0:
+                 colide.append(
+                     tile_images['box'].get_rect(topleft=(tile_width * x + move, tile_height * (y + 1) - 70)))"""
     count = 1
     return tiles_group
 
@@ -85,14 +95,13 @@ class Player:
         self.hp1 = pygame.image.load(f'images/hp/1HP.png').convert_alpha()
         self.hp2 = pygame.image.load(f'images/hp/2HP.png').convert_alpha()
         self.hp3 = pygame.image.load(f'images/hp/FullHP.png').convert_alpha()
-        self.stop = 0
+        self.on_floor = 1
 
     def rendering(self, screen, frame):
         if self.flag == 2:
             if frame == 2:
                 self.player.image = pygame.image.load(
                     f'images/Player/Player{self.sides[self.side]}Sword/PlayerAttack{self.sides[self.side]}1.png').convert_alpha()
-                self.player.rect.y = 620
             elif frame == 4:
                 self.player.image = pygame.image.load(
                     f'images/Player/Player{self.sides[self.side]}Sword/PlayerAttack{self.sides[self.side]}2.png').convert_alpha()
@@ -117,21 +126,29 @@ class Player:
                 self.y -= 15
             elif 6 <= self.jumping <= 10:
                 self.y -= 5
-            elif 10 <= self.jumping <= 20:
+            elif 10 <= self.jumping <= 20 and self.stop:
                 self.y += 11
             else:
                 self.flag = 1
                 self.jumping = 0
 
-        """if pygame.sprite.spritecollideany(self.player, blocks_grop):
-            self.stop = 1
+        if pygame.sprite.spritecollide(self.player, let_group, False, pygame.sprite.collide_mask):
+            self.stop = 0
         else:
-            self.stop = 0"""
+            self.stop = 1
+
+        if pygame.sprite.spritecollide(self.player, floor_group, False, pygame.sprite.collide_mask):
+            pass
+        else:
+            print(self.stop)
+            if self.flag != 3 and self.stop:
+                self.y += 10
         if self.side:
             self.player.rect = self.player.image.get_rect(bottomleft=(self.x, self.y))
         else:
             self.player.rect = self.player.image.get_rect(bottomright=(self.x, self.y))
         self.render.draw(screen)
+        self.dead()
 
     def walk_left(self, frame):
         if frame == 7:
@@ -142,12 +159,11 @@ class Player:
             self.player.image = self.playerleft3
         elif frame == 28:
             self.player.image = self.playerleft4
-        if self.stop == 0:
-            if self.player.rect.x != 0:
-                self.x -= 4
-            else:
-                self.move += 2
-            self.side = 0
+        if self.player.rect.x > 150:
+            self.x -= 4
+        else:
+            self.move += 2
+        self.side = 0
 
     def walk_right(self, frame):
         if frame == 7:
@@ -158,12 +174,11 @@ class Player:
             self.player.image = self.playerRight3
         elif frame == 28:
             self.player.image = self.playerRight4
-        if self.stop == 0:
-            if self.player.rect.x != 1000:
-                self.x += 4
-            else:
-                self.move -= 2
-            self.side = 1
+        if self.player.rect.x != 1000:
+            self.x += 4
+        else:
+            self.move -= 2
+        self.side = 1
 
     def check(self, frame):
         if frame == 28:
@@ -179,6 +194,11 @@ class Player:
         if self.flag != 2:
             self.flag = 3
 
+    def dead(self):
+        if self.y > 1300:
+            pygame.quit()
+            exit()
+
 
 size = width, height = 1920, 1080
 screen = pygame.display.set_mode(size)
@@ -188,7 +208,7 @@ running = True
 while running:
     frame += 1
     screen.blit(background, (0, 0))
-    generate_level(load_level('map.txt'), screen, main_character.move)
+    generate_level(load_level('maps/map.txt'), screen, main_character.move)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -211,3 +231,4 @@ while running:
     frame = main_character.check(frame)
     clock.tick(fps)
     pygame.display.flip()
+    print(main_character.y)
