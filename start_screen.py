@@ -2,6 +2,7 @@ import pygame
 
 pygame.init()
 bg = pygame.image.load('images/icon.png')
+name = pygame.image.load('images/фыв.png')
 
 
 class Button:
@@ -33,14 +34,15 @@ button0 = Button(-50, -55, 0, 0, '1 Уровень', 'WHITE', 'BLACK')
 button = Button(SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT // 2 - 55, 100, 50, '1 Уровень', 'WHITE', 'BLACK')
 button1 = Button(SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT // 2, 100, 50, '2 Уровень', 'WHITE', 'BLACK')
 button2 = Button(SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT // 2 + 55, 100, 50, '3 Уровень', 'WHITE', 'BLACK')
-
-# Создаем экран
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 go = 0
+pygame.display.set_icon(bg)
+pygame.display.set_caption('Mighty Streamer')
 buttons = [button0, button, button1, button2]
 running = True
 while running:
     screen.blit(bg, (0, 0))
+    screen.blit(name, (SCREEN_WIDTH // 2 - 75, 50))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -48,7 +50,7 @@ while running:
             for i in buttons:
                 if i.rect.collidepoint(event.pos):
                     go = buttons.index(i)
-                    print(go)
+
     if go:
         pygame.quit()
         running = False
