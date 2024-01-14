@@ -1,7 +1,7 @@
 import pygame
 
 pygame.init()
-
+bg = pygame.image.load('images/icon.png')
 
 class Button:
     def __init__(self, x, y, width, height, text, color, text_color):
@@ -39,6 +39,7 @@ go = 0
 buttons = [button0, button, button1, button2]
 running = True
 while running:
+    screen.blit(bg)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
