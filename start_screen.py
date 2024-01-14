@@ -3,6 +3,7 @@ import pygame
 pygame.init()
 bg = pygame.image.load('images/icon.png')
 
+
 class Button:
     def __init__(self, x, y, width, height, text, color, text_color):
         self.rect = pygame.Rect(x, y, width, height)
@@ -26,9 +27,9 @@ def update(buttons, screen):
         i.draw(screen)
 
 
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
-button0 = Button(-50,-55, 0, 0, '1 Уровень', 'WHITE', 'BLACK')
+SCREEN_WIDTH = 392
+SCREEN_HEIGHT = 357
+button0 = Button(-50, -55, 0, 0, '1 Уровень', 'WHITE', 'BLACK')
 button = Button(SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT // 2 - 55, 100, 50, '1 Уровень', 'WHITE', 'BLACK')
 button1 = Button(SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT // 2, 100, 50, '2 Уровень', 'WHITE', 'BLACK')
 button2 = Button(SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT // 2 + 55, 100, 50, '3 Уровень', 'WHITE', 'BLACK')
@@ -39,7 +40,7 @@ go = 0
 buttons = [button0, button, button1, button2]
 running = True
 while running:
-    screen.blit(bg)
+    screen.blit(bg, (0, 0))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
