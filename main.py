@@ -28,7 +28,7 @@ import pygame
 
 pygame.init()
 bg = pygame.image.load('images/icon.png')
-name = pygame.image.load('images/фыв.png')
+name = pygame.image.load('images/name.png')
 
 
 class Button:
@@ -304,7 +304,8 @@ def generate_level(level, screen, move=0):
 
 size = width, height = 1920, 1080
 screen = pygame.display.set_mode(size)
-a = generate_level(load_level('maps/map.txt'), screen)
+a = generate_level(load_level(f'maps/map{go}.txt'), screen)
+print(go)
 main_character = a[0]
 enemy = a[1]
 frame = 0
@@ -312,7 +313,7 @@ running = True
 while running:
     frame += 1
     screen.blit(background, (0, 0))
-    a = generate_level(load_level('maps/map.txt'), screen, main_character.move)
+    a = generate_level(load_level(f'maps/map{go}.txt'), screen, main_character.move)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
