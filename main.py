@@ -3,7 +3,7 @@ import pygame
 icon = pygame.image.load('images/icon.png')
 pygame.display.set_icon(icon)
 pygame.display.set_caption('Mighty Streamer')
-background = pygame.image.load('images/q.jpg')
+background = pygame.image.load('images/bg_final.jpg')
 pygame.font.init()
 
 font = pygame.font.Font(None, 25)
