@@ -63,12 +63,14 @@ class Mob:
         self.mob.rect.y = y
         self.hp = 3
 
-    def mob_view(self, player):
+    def rendering(self, player):
         if self.mob.rect.x > player.x:
             self.mob.image = pygame.image.load(f'images/MobSprite/MobLeft/MobLethalLeft1.png')
 
         elif self.mob.rect.x < player.x:
             self.mob.image = pygame.image.load(f'images/MobSprite/MobRight/MobLethalRight1.png')
+
+        self.render.draw(screen)
 
 
 class Player:
@@ -228,26 +230,27 @@ def generate_level(level, screen, move=0):
                 a.rect = a.image.get_rect(topleft=(tile_width * x + move, tile_height * y))
                 let_group.add(a)
             elif level[y][x] == '!':
-                a = Mob(tile_width * x + move, tile_height * y - 120)
-                enemy.add(a)
+                n = Mob(tile_width * x + move, tile_height * y - 120)
             elif level[y][x] == '^':
                 screen.blit(
                     tile_images['clouds'].get_rect(topleft=(tile_width * x + move, tile_height * y)))
             elif level[y][x] == '@':
                 d = Player(tile_width * x, tile_height * y)
             count = 1
-    return d
+    return d, n
 
 
 size = width, height = 1920, 1080
 screen = pygame.display.set_mode(size)
-main_character = generate_level(load_level('maps/map.txt'), screen)
+a = generate_level(load_level('maps/map.txt'), screen)
+main_character = a[0]
+enemy = a[1]
 frame = 0
 running = True
 while running:
     frame += 1
     screen.blit(background, (0, 0))
-    generate_level(load_level('maps/map.txt'), screen, main_character.move)
+    a = generate_level(load_level('maps/map.txt'), screen, main_character.move)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -268,5 +271,7 @@ while running:
     if keys[pygame.K_a]:
         main_character.walk_left(frame)
     frame = main_character.check(frame)
+    enemy = a[1]
+    enemy.rendering(main_character)
     clock.tick(fps)
     pygame.display.flip()
