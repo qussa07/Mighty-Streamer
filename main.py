@@ -265,8 +265,14 @@ class Player:
 
     def dead(self):
         if self.y > 1300:
-            pygame.quit()
-            exit()
+            final()
+
+
+
+def final():
+    global running
+    running = False
+
 
 
 def generate_level(level, screen, move=0):
@@ -305,7 +311,6 @@ def generate_level(level, screen, move=0):
 size = width, height = 1920, 1080
 screen = pygame.display.set_mode(size)
 a = generate_level(load_level(f'maps/map{go}.txt'), screen)
-print(go)
 main_character = a[0]
 enemy = a[1]
 frame = 0
@@ -337,4 +342,46 @@ while running:
     enemy = a[1]
     enemy.rendering(main_character)
     clock.tick(fps)
+    pygame.display.flip()
+
+
+
+icon = pygame.image.load('images/icon.png')
+pygame.display.set_icon(icon)
+pygame.display.set_caption('Mighty Streamer')
+background = pygame.image.load('images/q.jpg')
+pygame.font.init()
+
+font = pygame.font.Font(None, 25)
+
+size = width, height = 544, 320
+screen = pygame.display.set_mode(size)
+running = True
+end = True
+
+while running:
+    if end:
+        screen.fill('gray')
+        over = font.render('GAME OVER', True, 'purple')
+        screen.blit(over, (70, 100))
+
+        restart = font.render('Нажмите на любую клавишу для продолжения', True, 'purple')
+        screen.blit(restart, (70, 140))
+    else:
+        screen.fill('black')
+        screen.blit(background, (0, 0))
+
+        time_text = font.render('Время проведенное в игре: 0', True, 'purple')
+        screen.blit(time_text, (0, 25))
+
+        kill_text = font.render('Убито врагов: 0', True, 'purple')
+        screen.blit(kill_text, (0, 50))
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+        if event.type == pygame.KEYDOWN:
+            end = False
+
     pygame.display.flip()
