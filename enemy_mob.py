@@ -22,12 +22,14 @@ class Mob:
         self.mob.rect.y = y
         self.hp = 3
 
-    def mob_view(self, player):
+    def rendering(self, player):
         if self.mob.rect.x > player.x:
             self.mob.image = pygame.image.load(f'images/MobSprite/MobLeft/MobLethalLeft1.png')
 
         elif self.mob.rect.x < player.x:
             self.mob.image = pygame.image.load(f'images/MobSprite/MobRight/MobLethalRight1.png')
+
+        mob.render.draw(screen)
 
 
 if __name__ == '__main__':
