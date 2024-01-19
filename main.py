@@ -112,6 +112,23 @@ class up:
 
 enemy = up()
 
+import time
+
+class Timer:
+    def __init__(self):
+        self.start_time = None
+        self.end_time = None
+
+    def start(self):
+        self.start_time = time.perf_counter()
+
+    def stop(self):
+        self.end_time = time.perf_counter()
+
+    def elapsed(self):
+        if self.end_time is None:
+            return time.perf_counter() - self.start_time
+        return self.end_time - self.start_time
 
 class Mob:
     def __init__(self, x, y):
@@ -124,15 +141,23 @@ class Mob:
         self.mob.rect.x = x
         self.mob.rect.y = y
         self.hp = 3
+        self.stop = 0
 
-    def rendering(self, player):
+    def rendering(self, player, move=0):
+        all_sprites_group = pygame.sprite.Group()
+        all_sprites_group.add(player.player)
+        self.mob.rect.x += move
         if self.mob.rect.x > player.x:
             self.mob.image = pygame.image.load(f'images/MobSprite/MobLeft/MobLethalLeft1.png')
 
         elif self.mob.rect.x < player.x:
             self.mob.image = pygame.image.load(f'images/MobSprite/MobRight/MobLethalRight1.png')
-
-        self.render.draw(screen)
+        if pygame.sprite.spritecollide(self.mob, all_sprites_group, False):
+            self.stop = 1
+        else:
+            if not self.stop:
+                self.render.draw(screen)
+                self.stop = 1
 
 
 class Player:
@@ -151,6 +176,7 @@ class Player:
         self.side = 0
         self.jumping = 0
         self.move = 0
+        self.kill = 0
         self.sides = ['Left', 'Right']
         self.playerleft1 = pygame.image.load(f'images/Player/PlayerLeft/playerleft1.png').convert_alpha()
         self.playerleft2 = pygame.image.load(f'images/Player/PlayerLeft/playerleft2.png').convert_alpha()
@@ -183,6 +209,8 @@ class Player:
                 self.player.rect = self.player.image.get_rect(bottomleft=(self.x, self.y))
                 self.flag = 1
                 self.y -= 10
+            if pygame.sprite.spritecollide(self.player, enemy_group, False, pygame.sprite.collide_mask):
+                self.kill += 1
         elif self.flag == 1:
             if self.side == 1:
                 self.player.image = self.playerRight1
@@ -263,16 +291,21 @@ class Player:
         if self.flag != 2:
             self.flag = 3
 
-    def dead(self):
+    def dead(self, win=0):
         if self.y > 1300:
             final()
+        elif win:
+            final()
 
+    def end(self, end):
+        if self.x + abs(self.move) >= end[0]:
+            self.dead(1)
+            print(1)
 
 
 def final():
     global running
     running = False
-
 
 
 def generate_level(level, screen, move=0):
@@ -282,6 +315,7 @@ def generate_level(level, screen, move=0):
     tiles_group.empty()
     enemy_group.empty()
     let_group.empty()
+    mobs = []
     x, y = 0, 0
     for y in range(len(level)):
         for x in range(len(level[y])):
@@ -298,14 +332,22 @@ def generate_level(level, screen, move=0):
                 a.rect = a.image.get_rect(topleft=(tile_width * x + move, tile_height * y))
                 let_group.add(a)
             elif level[y][x] == '!':
-                n = Mob(tile_width * x + move, tile_height * y - 120)
-            elif level[y][x] == '^':
-                screen.blit(
-                    tile_images['clouds'].get_rect(topleft=(tile_width * x + move, tile_height * y)))
+                if count != 0:
+                    n = Mob(tile_width * x, tile_height * y - 120)
+                    enemy_group.add(n.mob)
+                    mobs.append(n)
+            elif level[y][x] == '|':
+                if count != 0:
+                    end_lvl = (tile_width * x, tile_height * y)
             elif level[y][x] == '@':
                 d = Player(tile_width * x, tile_height * y)
             count = 1
-    return d, n
+    return d, n, mobs, end_lvl
+
+
+def update(sp, player):
+    for i in sp:
+        i.rendering(player, player.move)
 
 
 size = width, height = 1920, 1080
@@ -340,11 +382,10 @@ while running:
         main_character.walk_left(frame)
     frame = main_character.check(frame)
     enemy = a[1]
-    enemy.rendering(main_character)
+    main_character.end(a[-1])
+    update(a[-2], main_character)
     clock.tick(fps)
     pygame.display.flip()
-
-
 
 icon = pygame.image.load('images/icon.png')
 pygame.display.set_icon(icon)
@@ -371,10 +412,10 @@ while running:
         screen.fill('black')
         screen.blit(background, (0, 0))
 
-        time_text = font.render('Время проведенное в игре: 0', True, 'purple')
+        time_text = font.render('Время проведенное в игре: много', True, 'purple')
         screen.blit(time_text, (0, 25))
 
-        kill_text = font.render('Убито врагов: 0', True, 'purple')
+        kill_text = font.render(f'Убито врагов: {main_character.kill}', True, 'purple')
         screen.blit(kill_text, (0, 50))
 
     for event in pygame.event.get():
@@ -385,3 +426,4 @@ while running:
             end = False
 
     pygame.display.flip()
+pygame.quit()
