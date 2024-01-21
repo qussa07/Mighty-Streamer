@@ -20,7 +20,7 @@ while running:
     over = font.render('WIN', True, 'purple')
     screen.blit(over, ((1600 // 2) - 100, 900 // 2))
 
-    restart = font.render('Нажмите на любую клавишу для продолжения', True, 'purple')
+    restart = font.render('Нажмите на любую клавишу для закрытия', True, 'purple')
     screen.blit(restart, (0, 0))
 
     for event in pygame.event.get():
@@ -28,6 +28,6 @@ while running:
             running = False
 
         if event.type == pygame.KEYDOWN:
-            end = False
+            pygame.quit()
 
     pygame.display.flip()
