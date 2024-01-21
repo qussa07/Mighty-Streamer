@@ -423,7 +423,7 @@ while running:
             running = False
 
         if event.type == pygame.KEYDOWN:
-            end = False
+            pygame.quit()
 
     pygame.display.flip()
 pygame.quit()
