@@ -380,9 +380,9 @@ pygame.display.set_caption('Mighty Streamer')
 background = pygame.image.load('images/bg_final.jpg')
 pygame.font.init()
 
-font = pygame.font.Font(None, 25)
+font = pygame.font.Font(None, 50)
 
-size = width, height = 544, 320
+size = width, height = 1980, 1080
 screen = pygame.display.set_mode(size)
 running = True
 end = True
@@ -391,10 +391,10 @@ while running:
     if end:
         screen.fill('gray')
         over = font.render('GAME OVER', True, 'purple')
-        screen.blit(over, (70, 100))
+        screen.blit(over, (1980 // 2 - 120, 1080 // 2 - 90))
 
-        restart = font.render('Нажмите на любую клавишу для продолжения', True, 'purple')
-        screen.blit(restart, (70, 140))
+        restart = font.render('Нажмите на любую клавишу для выхода.', True, 'purple')
+        screen.blit(restart, (160, 100))
     else:
         screen.fill('black')
         screen.blit(background, (0, 0))
