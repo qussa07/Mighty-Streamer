@@ -24,7 +24,7 @@ tile_images = {
 }
 tile_width = tile_height = 70
 
-import pygame
+kill = 0
 
 pygame.init()
 bg = pygame.image.load('images/icon.png')
@@ -103,32 +103,15 @@ class up:
         self.sp = []
 
     def add(self, a):
-        self.sp.append(a)
+        self.sp.extend(a)
 
     def update(self, player):
-        for i in self.sp:
-            i.mob_view(player)
+        for mob in self.sp:
+            mob.rendering(player, player.move)
 
 
 enemy = up()
 
-import time
-
-class Timer:
-    def __init__(self):
-        self.start_time = None
-        self.end_time = None
-
-    def start(self):
-        self.start_time = time.perf_counter()
-
-    def stop(self):
-        self.end_time = time.perf_counter()
-
-    def elapsed(self):
-        if self.end_time is None:
-            return time.perf_counter() - self.start_time
-        return self.end_time - self.start_time
 
 class Mob:
     def __init__(self, x, y):
@@ -139,25 +122,28 @@ class Mob:
         self.render = pygame.sprite.Group()
         self.render.add(self.mob)
         self.mob.rect.x = x
+        self.x = x
         self.mob.rect.y = y
         self.hp = 3
         self.stop = 0
 
     def rendering(self, player, move=0):
+        global kill
         all_sprites_group = pygame.sprite.Group()
-        all_sprites_group.add(player.player)
-        self.mob.rect.x += move
+        all_sprites_group.add(main_character.player)
+        self.mob.rect.x = self.x + move
         if self.mob.rect.x > player.x:
             self.mob.image = pygame.image.load(f'images/MobSprite/MobLeft/MobLethalLeft1.png')
-
         elif self.mob.rect.x < player.x:
             self.mob.image = pygame.image.load(f'images/MobSprite/MobRight/MobLethalRight1.png')
-        if pygame.sprite.spritecollide(self.mob, all_sprites_group, False):
+        if (pygame.sprite.spritecollide(self.mob, all_sprites_group, False) and player.flag == 2 and
+                not (self.stop)):
             self.stop = 1
+            kill += 1
+        if self.stop:
+            pass
         else:
-            if not self.stop:
-                self.render.draw(screen)
-                self.stop = 1
+            self.render.draw(screen)
 
 
 class Player:
@@ -191,6 +177,7 @@ class Player:
         self.hp2 = pygame.image.load(f'images/hp/2HP.png').convert_alpha()
         self.hp3 = pygame.image.load(f'images/hp/FullHP.png').convert_alpha()
         self.on_floor = 1
+        self.enemy_gp = 0
 
     def rendering(self, screen, frame):
         if self.flag == 2:
@@ -209,8 +196,6 @@ class Player:
                 self.player.rect = self.player.image.get_rect(bottomleft=(self.x, self.y))
                 self.flag = 1
                 self.y -= 10
-            if pygame.sprite.spritecollide(self.player, enemy_group, False, pygame.sprite.collide_mask):
-                self.kill += 1
         elif self.flag == 1:
             if self.side == 1:
                 self.player.image = self.playerRight1
@@ -229,6 +214,7 @@ class Player:
             else:
                 self.flag = 1
                 self.jumping = 0
+
 
         if pygame.sprite.spritecollide(self.player, let_group, False, pygame.sprite.collide_mask):
             self.stop = 0
@@ -259,7 +245,8 @@ class Player:
         if self.player.rect.x > 150:
             self.x -= 4
         else:
-            self.move += 2
+            if self.move != 0:
+                self.move += 2
         self.side = 0
 
     def walk_right(self, frame):
@@ -342,7 +329,7 @@ def generate_level(level, screen, move=0):
             elif level[y][x] == '@':
                 d = Player(tile_width * x, tile_height * y)
             count = 1
-    return d, n, mobs, end_lvl
+    return d, n, enemy_group, mobs, end_lvl
 
 
 def update(sp, player):
@@ -354,7 +341,8 @@ size = width, height = 1920, 1080
 screen = pygame.display.set_mode(size)
 a = generate_level(load_level(f'maps/map{go}.txt'), screen)
 main_character = a[0]
-enemy = a[1]
+main_character.enemy_gp = a[2]
+enemy.add(a[-2])
 frame = 0
 running = True
 while running:
@@ -381,9 +369,8 @@ while running:
     if keys[pygame.K_a]:
         main_character.walk_left(frame)
     frame = main_character.check(frame)
-    enemy = a[1]
     main_character.end(a[-1])
-    update(a[-2], main_character)
+    enemy.update(main_character)
     clock.tick(fps)
     pygame.display.flip()
 
@@ -415,7 +402,7 @@ while running:
         time_text = font.render('Время проведенное в игре: много', True, 'purple')
         screen.blit(time_text, (0, 25))
 
-        kill_text = font.render(f'Убито врагов: {main_character.kill}', True, 'purple')
+        kill_text = font.render(f'Убито врагов: {kill}', True, 'purple')
         screen.blit(kill_text, (0, 50))
 
     for event in pygame.event.get():
@@ -423,7 +410,7 @@ while running:
             running = False
 
         if event.type == pygame.KEYDOWN:
-            pygame.quit()
+            end = False
 
     pygame.display.flip()
 pygame.quit()
